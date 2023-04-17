@@ -93,7 +93,7 @@ const Dashboard = () => {
   const onChatGenerate = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/generate-survey/?chat=bus&type=mixed");
+      const res = await fetch(`/api/generate-survey/?chat=${gptText}&type=${choiceType}`);
       const theRes = await res.json();
       setSurveyJSON(JSON.parse(theRes.text));
       setToastMsg("Success! your survey is generated below");
@@ -418,7 +418,7 @@ const SurveyResults = ({ surveyResults }) => {
   console.log("surveyResults", surveyResults);
   return (
     <div className="w-full max-w-4xl mx-auto py-8 px-4 bg-white shadow-md rounded-md">
-      <h1 className="text-2xl font-bold text-center mb-6">Survey Results</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">Survey Results ({surveyResults?.length})</h1>
       {surveyResults.map((result, index) => (
         <div key={index} className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Response #{index + 1}</h2>
@@ -428,7 +428,7 @@ const SurveyResults = ({ surveyResults }) => {
           <div>
             <span className="font-bold">Responses:</span>
             <ul className="list-disc pl-5">
-              {Object.entries(result).map(([question, answer]) => (
+              {Object.entries(result?.result).map(([question, answer]) => (
                 <li key={question}>
                   <span className="font-semibold">{question}:</span>{" "}
                   {Array.isArray(answer) ? answer.join(", ") : answer}
