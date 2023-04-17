@@ -13,7 +13,7 @@ const Page = ({ params }) => {
   useEffect(async () => {
     setIsLoading(true);
     let data = await fetch(
-      `/api/submit-survey/${decodeURIComponent(userId)}/${surveyIndex}`
+      `/api/survey/${decodeURIComponent(userId)}/${surveyIndex}`
     );
     data = await data.json();
     console.log("hello data", data);

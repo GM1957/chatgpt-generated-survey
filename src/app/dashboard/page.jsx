@@ -113,7 +113,7 @@ const Dashboard = () => {
     console.log("Survey Completed: ", data);
   };
 
-  const shareAbleLink = `${window.location.hostname}/survey/${userData?.id}/${activeSidebar}`;
+  const shareAbleLink = `${window.location.hostname}/submit-survey/${userData?.id}/${activeSidebar}`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareAbleLink);
