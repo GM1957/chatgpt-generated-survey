@@ -1,124 +1,235 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+"use client";
 
-const inter = Inter({ subsets: ['latin'] })
+import React, { useState } from "react";
+import { LoginCard, SignupCard } from "@/components";
+import { Toast } from "@/components";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
+const HomePage = () => {
+  const onSignup = () => {};
+  const onLogin = () => {};
+
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const router = useRouter();
+
+  const onSubmitLogin = async (inputObj) => {
+    console.log("inputObj", inputObj);
+    let response = await fetch("/api/users/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(inputObj),
+    });
+    response = await response.json();
+    console.log("login response", response);
+    if (!response.error) {
+      localStorage.setItem(
+        "userData",
+        JSON.stringify({
+          id: response?.id,
+          isLoggedIn: response.isLoggedIn,
+          password: response.password,
+          timeStamp: response.timeStamp,
+        })
+      );
+      setToastMsg("Success! You are now logged in.");
+      setShowToast(Math.random());
+      router.push("/dashboard");
+    } else {
+      setToastMsg("Error! Unable to log in.");
+      setShowToast(Math.random());
+    }
+  };
+
+  const onSubmitSignup = async (inputObj) => {
+    const response = await fetch("/api/users/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(inputObj),
+    });
+
+    if (!response.error) {
+      setToastMsg("Success! Accout created. Please login!");
+      setShowToast(Math.random());
+    } else {
+      setToastMsg("Error! Unable to create account");
+      setShowToast(Math.random());
+    }
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="min-h-screen bg-gray-100">
+      <Toast show={showToast} message={toastMsg} duration={3000} />
+      {/* Navbar */}
+      <nav className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <div className="text-2xl font-bold text-indigo-600">
+                Survey Maker
+              </div>
+            </div>
+            <div className="hidden sm:block sm:ml-6">
+              <div className="flex space-x-4">
+                <button
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+                  onClick={() => {
+                    setIsLoginOpen(true);
+                    setIsSignupOpen(false);
+                  }}
+                >
+                  Login
+                </button>
+                <button
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+                  onClick={() => {
+                    setIsSignupOpen(true);
+                    setIsLoginOpen(false);
+                  }}
+                >
+                  Signup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="transition-all ease-in-out duration-500">
+        {isLoginOpen ? (
+          <LoginCard
+            onClose={() => setIsLoginOpen(false)}
+            onSubmitLogin={onSubmitLogin}
+          />
+        ) : isSignupOpen ? (
+          <SignupCard
+            onClose={() => setIsSignupOpen(false)}
+            onSubmitSignup={onSubmitSignup}
+          />
+        ) : null}
+      </div>
+      <div className="bg-gradient-to-b from-indigo-600 to-purple-600 py-32 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="max-w-3xl text-center">
+          <h2 className="text-4xl font-bold text-white mb-4 tracking-wide">
+            Welcome to Survey Maker
+          </h2>
+          <p className="text-lg font-semibold text-white mb-8">
+            Create surveys using GPT-4 powered chat and easily share them with
+            your users.
+          </p>
+          <div className="flex justify-center">
+            <a
+              href="#"
+              className="bg-white text-indigo-600 px-8 py-4 rounded-full text-lg font-bold hover:bg-indigo-200 hover:text-white hover:border-indigo-700 transition-all duration-200"
+            >
+              Get Started
+            </a>
+          </div>
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      {/* Body */}
+      <div className="bg-gray-100 py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="space-y-12">
+            {/* Features */}
+            <div>
+              <h2 className="text-2xl font-semibold text-center text-gray-900">
+                Features
+              </h2>
+              <div className="my-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="bg-white p-6 rounded-lg shadow text-center">
+                  <i className="fas fa-comment text-4xl text-indigo-600 mb-4"></i>
+                  <h3 className="text-xl font-semibold">GPT-4 Powered Chat</h3>
+                  <p className="mt-4 text-gray-500">
+                    Create engaging surveys using GPT-4 powered chat, making
+                    them interactive and user-friendly.
+                  </p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow text-center">
+                  <i className="fas fa-share-alt text-4xl text-indigo-600 mb-4"></i>
+                  <h3 className="text-xl font-semibold">Easy Sharing</h3>
+                  <p className="mt-4 text-gray-500">
+                    Share your surveys with your users via unique links, making
+                    it simple and convenient to collect responses.
+                  </p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow text-center">
+                  <i className="fas fa-chart-line text-4xl text-indigo-600 mb-4"></i>
+                  <h3 className="text-xl font-semibold">
+                    Insightful Analytics
+                  </h3>
+                  <p className="mt-4 text-gray-500">
+                    Unlocking Valuable Insights: The Power of Analytics in
+                    Survey Results
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-semibold text-center text-gray-900">
+                  How It Works
+                </h2>
+                <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="bg-white p-6 rounded-lg shadow text-center">
+                    <div className="text-4xl text-indigo-600 mb-4">1</div>
+                    <h3 className="text-xl font-semibold">Sign Up</h3>
+                    <p className="mt-4 text-gray-500">
+                      Create your Survey Maker account to access our powerful
+                      survey creation tools and analytics.
+                    </p>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg shadow text-center">
+                    <div className="text-4xl text-indigo-600 mb-4">2</div>
+                    <h3 className="text-xl font-semibold">Create Survey</h3>
+                    <p className="mt-4 text-gray-500">
+                      Design your survey using our GPT-4 powered chat system,
+                      making it interactive and personalized.
+                    </p>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg shadow text-center">
+                    <div className="text-4xl text-indigo-600 mb-4">3</div>
+                    <h3 className="text-xl font-semibold">Collect Responses</h3>
+                    <p className="mt-4 text-gray-500">
+                      Share your survey link with your users, collect their
+                      responses, and analyze the results for valuable insights.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+      {/* Footer */}
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Find in-depth information about Next.js features and API.
+      <footer className="bg-white">
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <nav className="flex flex-wrap justify-center">
+            <div className="mt-3 md:mt-0 md:ml-6">
+              <a href="#" className="text-gray-500 hover:text-gray-900">
+                Privacy Policy
+              </a>
+            </div>
+            <div className="mt-3 md:mt-0 md:ml-6">
+              <a href="#" className="text-gray-500 hover:text-gray-900">
+                Terms & Conditions
+              </a>
+            </div>
+          </nav>
+          <p className="mt-8 text-center text-xs text-gray-500">
+            &copy; 2023 Survey Maker. All rights reserved.
           </p>
-        </a>
+        </div>
+      </footer>
+    </div>
+  );
+};
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default HomePage;
